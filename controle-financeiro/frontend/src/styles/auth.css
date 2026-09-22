@@ -1,0 +1,36 @@
+/* src/styles/auth.css */
+
+.auth-card-top-border {
+  position: relative;
+}
+
+.auth-card-top-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #873F2B, #7D916E);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  z-index: 10;
+}
+
+/* Fix autofill colors keeping palette harmony */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  -webkit-box-shadow: 0 0 0px 1000px hsl(var(--background)) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Custom focus ring */
+.input-focus-ring:focus-within {
+  outline: none;
+  ring: 2px;
+  ring-color: hsl(var(--primary) / 0.4);
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.4);
+}

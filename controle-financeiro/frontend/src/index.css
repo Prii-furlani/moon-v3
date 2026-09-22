@@ -1,0 +1,164 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+@layer base {
+  .theme {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+  }
+  :root {
+    --background: 36 37% 75%;
+    --foreground: 13 52% 15%;
+    --card: 36 40% 80%;
+    --card-foreground: 13 52% 15%;
+    --popover: 36 40% 80%;
+    --popover-foreground: 13 52% 15%;
+    --primary: 13 52% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 94 15% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 36 30% 65%;
+    --muted-foreground: 36 20% 40%;
+    --accent: 36 30% 65%;
+    --accent-foreground: 13 52% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 36 20% 60%;
+    --input: 36 20% 60%;
+    --ring: 13 52% 35%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 22 22% 10%;
+    --foreground: 36 37% 85%;
+    --card: 22 16% 13%;
+    --card-foreground: 36 37% 85%;
+    --popover: 22 16% 13%;
+    --popover-foreground: 36 37% 85%;
+    --primary: 13 52% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 94 15% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 22 15% 20%;
+    --muted-foreground: 36 15% 65%;
+    --accent: 23 15% 17%;
+    --accent-foreground: 36 37% 85%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 22 15% 25%;
+    --input: 22 15% 25%;
+    --ring: 13 52% 40%;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

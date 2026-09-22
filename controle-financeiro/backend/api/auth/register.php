@@ -1,4 +1,19 @@
 <?php
+// Previne exibição de avisos em HTML que quebram o JSON
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// Tratamento global de erros para retornar estritamente JSON
+set_error_handler(function($severity, $message, $file, $line) {
+    http_response_code(500);
+    echo json_encode(["status" => "error", "message" => "Erro PHP interno: " . $message]);
+    exit();
+});
 require_once '../../config/cors.php';
 require_once '../../config/database.php';
 
@@ -55,21 +70,52 @@ if ($stmt_check->rowCount() > 0) {
 // Hash da senha
 $senha_hash = password_hash($senha_pura, PASSWORD_DEFAULT);
 
-$query = "INSERT INTO usuarios (nome, sobrenome, cpf, data_nascimento, email, senha, status, onboarding_completo) 
-          VALUES (:nome, :sobrenome, :cpf, :data_nascimento, :email, :senha, 'ativo', 0)";
+try {
+    $conn->beginTransaction();
 
-$stmt = $conn->prepare($query);
-$stmt->bindParam(':nome', $nome);
-$stmt->bindParam(':sobrenome', $sobrenome);
-$stmt->bindParam(':cpf', $cpf);
-$stmt->bindParam(':data_nascimento', $data_nascimento);
-$stmt->bindParam(':email', $email);
-$stmt->bindParam(':senha', $senha_hash);
-
-if ($stmt->execute()) {
-    $user_id = $conn->lastInsertId();
+    // 1. Cadastrar Usuário
+    $query = "INSERT INTO usuarios (nome, sobrenome, cpf, data_nascimento, email, senha, status, onboarding_completo) 
+              VALUES (:nome, :sobrenome, :cpf, :data_nascimento, :email, :senha, 'ativo', 0)";
     
-    // Iniciar sessão
+    $stmt = $conn->prepare($query);
+    $stmt->execute([
+        ':nome' => $nome,
+        ':sobrenome' => $sobrenome,
+        ':cpf' => $cpf,
+        ':data_nascimento' => $data_nascimento,
+        ':email' => $email,
+        ':senha' => $senha_hash
+    ]);
+    
+    $user_id = $conn->lastInsertId();
+
+    // 2. Criar Conta Padrão ("Carteira")
+    $stmtConta = $conn->prepare("INSERT INTO contas (usuario_id, nome, saldo_inicial, cor) VALUES (:uid, 'Carteira', 0.00, '#000000')");
+    $stmtConta->execute([':uid' => $user_id]);
+
+    // 3. Criar Categorias Iniciais Padrão (Seed)
+    $categorias_seed = [
+        ['nome' => 'Salário', 'tipo' => 'receita', 'icone' => 'Briefcase', 'cor' => '#7D916E'],
+        ['nome' => 'Investimentos', 'tipo' => 'receita', 'icone' => 'TrendingUp', 'cor' => '#873F2B'],
+        ['nome' => 'Alimentação', 'tipo' => 'despesa', 'icone' => 'Utensils', 'cor' => '#E74C3C'],
+        ['nome' => 'Transporte', 'tipo' => 'despesa', 'icone' => 'Car', 'cor' => '#F39C12'],
+        ['nome' => 'Moradia', 'tipo' => 'despesa', 'icone' => 'Home', 'cor' => '#9B59B6']
+    ];
+
+    $stmtCat = $conn->prepare("INSERT INTO categorias (usuario_id, nome, tipo, icone, cor) VALUES (:uid, :nome, :tipo, :icone, :cor)");
+    foreach ($categorias_seed as $cat) {
+        $stmtCat->execute([
+            ':uid' => $user_id,
+            ':nome' => $cat['nome'],
+            ':tipo' => $cat['tipo'],
+            ':icone' => $cat['icone'],
+            ':cor' => $cat['cor']
+        ]);
+    }
+
+    $conn->commit();
+
+    // 4. Iniciar sessão do usuário criado
     session_start();
     session_regenerate_id(true);
     $_SESSION['user_id'] = $user_id;
@@ -90,7 +136,9 @@ if ($stmt->execute()) {
             "avatar" => null
         ]
     ]);
-} else {
+
+} catch (Exception $e) {
+    $conn->rollBack();
     http_response_code(500);
-    echo json_encode(["status" => "error", "message" => "Erro ao registrar o usuário."]);
+    echo json_encode(["status" => "error", "message" => "Erro ao registrar o usuário ou criar dados padrão: " . $e->getMessage()]);
 }

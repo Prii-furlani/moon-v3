@@ -23,15 +23,23 @@ export async function fetchApi<T>(endpoint: string, options: RequestOptions = {}
     }
     
     const response = await fetch(`${BASE_URL}${endpoint}`, config);
+    const responseText = await response.text();
     
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 401) {
-            // Disparar evento global para o AuthContext interceptar
-            window.dispatchEvent(new CustomEvent('auth-error', { detail: errorData }));
-        }
-        throw new Error(errorData.message || 'Erro na requisição da API');
+    let data;
+    try {
+        data = JSON.parse(responseText);
+    } catch (e) {
+        console.error(`-> O servidor retornou texto/HTML em vez de JSON no endpoint ${endpoint}. Prévia:`, responseText.substring(0, 300));
+        throw new Error(`O servidor retornou erro HTTP ${response.status}. Verifique se o caminho da API está correto.`);
     }
     
-    return response.json();
+    if (!response.ok) {
+        if (response.status === 401) {
+            // Disparar evento global para o AuthContext interceptar
+            window.dispatchEvent(new CustomEvent('auth-error', { detail: data }));
+        }
+        throw new Error(data.message || 'Erro na requisição da API');
+    }
+    
+    return data;
 }

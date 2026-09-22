@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. Ignorar a pasta backend (deixe o Apache servir os arquivos .php reais)
+  RewriteCond %{REQUEST_URI} ^/backend/ [NC]
+  RewriteRule ^ - [L]
+
+  # 2. Ignorar arquivos reais existentes (ex: imagens, CSS, JS)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # 3. Qualquer outra rota (ex: /dashboard) vai para o index.html do React
+  RewriteRule ^ index.html [QSA,L]
+</IfModule>

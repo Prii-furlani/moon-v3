@@ -1,4 +1,5 @@
 <?php
+require_once '../../config/cors.php';
 // Previne exibição de avisos em HTML que quebram o JSON
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -9,7 +10,6 @@ set_error_handler(function($severity, $message, $file, $line) {
     echo json_encode(["status" => "error", "message" => "Erro PHP interno: " . $message]);
     exit();
 });
-require_once '../../config/cors.php';
 require_once '../../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

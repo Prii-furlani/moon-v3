@@ -1,4 +1,5 @@
 <?php
+require_once '../../config/cors.php';
 // Previne exibição de avisos em HTML que quebram o JSON
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -10,7 +11,6 @@ set_error_handler(function($severity, $message, $file, $line) {
     exit();
 });
 
-require_once '../../config/cors.php';
 require_once '../../config/database.php';
 
 session_start();

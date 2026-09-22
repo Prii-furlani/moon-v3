@@ -1,4 +1,5 @@
 <?php
+require_once '../../config/cors.php';
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
@@ -8,7 +9,6 @@ set_error_handler(function($severity, $message, $file, $line) {
     exit();
 });
 
-require_once '../../config/cors.php';
 require_once '../../config/database.php';
 
 session_start();
@@ -42,8 +42,10 @@ try {
                     echo json_encode(["status" => "error", "message" => "Transação não encontrada."]);
                 }
             } else {
-                // List all com inner joins para facilitar o frontend (extrato)
-                $stmt = $conn->prepare("
+                $mes = isset($_GET['mes']) ? (int)$_GET['mes'] : null;
+                $ano = isset($_GET['ano']) ? (int)$_GET['ano'] : null;
+
+                $query = "
                     SELECT 
                         t.id, t.tipo, t.valor, t.descricao, t.data_transacao, t.efetivada,
                         c.nome as conta_nome, c.cor as conta_cor,
@@ -51,10 +53,22 @@ try {
                     FROM transacoes t
                     INNER JOIN contas c ON t.conta_id = c.id
                     LEFT JOIN categorias cat ON t.categoria_id = cat.id
-                    WHERE t.usuario_id = :uid 
-                    ORDER BY t.data_transacao DESC, t.criado_em DESC
-                ");
-                $stmt->execute([':uid' => $user_id]);
+                    WHERE t.usuario_id = :uid
+                ";
+                
+                $params = [':uid' => $user_id];
+
+                if ($mes && $ano) {
+                    $query .= " AND MONTH(t.data_transacao) = :mes AND YEAR(t.data_transacao) = :ano";
+                    $params[':mes'] = $mes;
+                    $params[':ano'] = $ano;
+                }
+
+                $query .= " ORDER BY t.data_transacao DESC, t.criado_em DESC";
+
+                // List all (com filtros opcionais) e inner joins para facilitar o frontend (extrato)
+                $stmt = $conn->prepare($query);
+                $stmt->execute($params);
                 echo json_encode(["status" => "success", "data" => $stmt->fetchAll()]);
             }
             break;

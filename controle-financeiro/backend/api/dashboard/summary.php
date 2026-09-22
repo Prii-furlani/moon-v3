@@ -3,11 +3,6 @@
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
 // Tratamento global de erros para retornar estritamente JSON
 set_error_handler(function($severity, $message, $file, $line) {
     http_response_code(500);

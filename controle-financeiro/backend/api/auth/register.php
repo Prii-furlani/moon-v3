@@ -67,11 +67,28 @@ $stmt->bindParam(':email', $email);
 $stmt->bindParam(':senha', $senha_hash);
 
 if ($stmt->execute()) {
+    $user_id = $conn->lastInsertId();
+    
+    // Iniciar sessão
+    session_start();
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $user_id;
+    $_SESSION['last_activity'] = time();
+    
     http_response_code(201);
     echo json_encode([
         "status" => "success", 
-        "message" => "Usuário registrado com sucesso.",
-        "user_id" => $conn->lastInsertId()
+        "message" => "Usuário cadastrado com sucesso!",
+        "token" => session_id(),
+        "user" => [
+            "id" => (int) $user_id,
+            "nome" => $nome,
+            "sobrenome" => $sobrenome,
+            "email" => $email,
+            "cpf" => $cpf,
+            "onboarding_completo" => 0,
+            "avatar" => null
+        ]
     ]);
 } else {
     http_response_code(500);
